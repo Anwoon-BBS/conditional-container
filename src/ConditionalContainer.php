@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Nova\Contracts\RelatableField;
 use Laravel\Nova\Fields\Field;
+use Laravel\Nova\Fields\FieldCollection;
 use Laravel\Nova\Fields\File;
 use Laravel\Nova\Http\Controllers\ResourceUpdateController;
 use Laravel\Nova\Http\Controllers\UpdateFieldController;
@@ -25,7 +26,7 @@ class ConditionalContainer extends Field
     public $component = 'conditional-container';
 
     /**
-     * @var Collection
+     * @var FieldCollection
      */
     public $fields;
 
@@ -56,7 +57,7 @@ class ConditionalContainer extends Field
 
         parent::__construct('conditional_container_' . Str::random(10));
 
-        $this->fields = collect($fields);
+        $this->fields = FieldCollection::make(array_values($fields));
         $this->expressions = collect();
 
         $this->withMeta([ 'operation' => 'some' ]);
@@ -85,19 +86,6 @@ class ConditionalContainer extends Field
      */
     public function resolve($resource, $attribute = null)
     {
-
-        /**
-         * Avoid unselected fields coming with pre-filled data on update
-         */
-        if (resolve(NovaRequest::class)->route()->controller instanceof UpdateFieldController) {
-
-            if (count($this->resolveDependencyFieldUsingResource($resource)) === 0) {
-
-                return;
-
-            }
-
-        }
 
         /**
          * @var Field $field
@@ -373,14 +361,14 @@ class ConditionalContainer extends Field
 
     public function jsonSerialize()
     {
-        return array_merge([
+        return array_merge(parent::jsonSerialize(), [
             'fields' => $this->fields,
             'expressions' => $this->expressions->map(function ($expression) {
 
                 return is_callable($expression) ? $expression() : $expression;
 
             }),
-        ], parent::jsonSerialize());
+        ]);
     }
 
 }

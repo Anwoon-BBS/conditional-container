@@ -175,6 +175,8 @@ trait HasConditionalContainer
                 $field instanceof \NovaAttachMany\AttachMany ||
                 $field instanceof \Benjacho\BelongsToManyField\BelongsToManyField) {
 
+                if ($field instanceof \OptimistDigital\MultiselectField\Multiselect) continue;
+
                 $relations->push($field->attribute);
 
             }

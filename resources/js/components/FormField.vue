@@ -303,6 +303,9 @@
                     case 'BelongsToManyField':
                         return (value || []).map(({id}) => id)
 
+                    case 'multiselect-field':
+                        return (value || []).map(({value}) => value)
+
                 }
 
                 return value
